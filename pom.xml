@@ -6,13 +6,13 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.4.5</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
-	<groupId>com.example</groupId>
-	<artifactId>demo</artifactId>
+	<groupId>com.UniX</groupId>
+	<artifactId>UniX</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>demo</name>
-	<description>Demo project for Spring Boot</description>
+	<name>UniX</name>
+	<description>UniX project</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -56,7 +56,6 @@
 			<scope>annotationProcessor</scope>
 		</dependency>
 
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
@@ -72,13 +71,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-
-
-
-
-
-
-
-
 </project>
