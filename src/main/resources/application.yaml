@@ -1,0 +1,10 @@
+spring:
+    application:
+        name: demo
+    jpa:
+        show-sql: true
+    datasource:
+        url: jdbc:mysql://localhost:3306/seng2050
+        username: seng2050_admin
+        password: P@ssword
+
