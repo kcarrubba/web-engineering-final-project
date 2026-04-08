@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/enrol")
+@RequestMapping("/unix/enrol")
 public class EnrolController {
 
 
