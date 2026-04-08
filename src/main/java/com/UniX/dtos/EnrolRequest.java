@@ -15,5 +15,9 @@ public class EnrolRequest {
     @NotNull(message = "Course ID is required")
     private String courseId;
 
-
+    public EnrolRequest(String stdNo, Integer semesterId, String courseId) {
+        this.stdNo = stdNo;
+        this.semesterId = semesterId;
+        this.courseId = courseId;
+    }
 }
