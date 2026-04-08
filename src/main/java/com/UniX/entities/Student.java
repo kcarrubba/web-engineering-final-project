@@ -4,9 +4,15 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "student")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Student {
 
     @Id
@@ -24,55 +30,4 @@ public class Student {
 
     @Column(name = "passwordSalt")
     private Double passwordSalt;
-
-    public Student() {
-    }
-
-    public Student(String stdNo, String lastname, String givenNames, String passwordHash, Double passwordSalt) {
-        this.stdNo = stdNo;
-        this.lastname = lastname;
-        this.givenNames = givenNames;
-        this.passwordHash = passwordHash;
-        this.passwordSalt = passwordSalt;
-    }
-
-    public String getStdNo() {
-        return stdNo;
-    }
-
-    public void setStdNo(String stdNo) {
-        this.stdNo = stdNo;
-    }
-
-    public String getLastname() {
-        return lastname;
-    }
-
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
-    }
-
-    public String getGivenNames() {
-        return givenNames;
-    }
-
-    public void setGivenNames(String givenNames) {
-        this.givenNames = givenNames;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-
-    public Double getPasswordSalt() {
-        return passwordSalt;
-    }
-
-    public void setPasswordSalt(Double passwordSalt) {
-        this.passwordSalt = passwordSalt;
-    }
 }

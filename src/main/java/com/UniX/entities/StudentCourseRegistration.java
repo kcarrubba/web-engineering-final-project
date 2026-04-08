@@ -8,11 +8,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "StudentCourseRegistration")
 @IdClass(StudentCourseRegistrationId.class)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class StudentCourseRegistration {
 
     @Id
@@ -43,63 +50,4 @@ public class StudentCourseRegistration {
         @JoinColumn(name = "semesterID", referencedColumnName = "semesterID", insertable = false, updatable = false)
     })
     private CourseOffering courseOffering;
-
-    public StudentCourseRegistration() {
-    }
-
-    public StudentCourseRegistration(String stdNo, String courseId, Integer semesterId, String grade, BigDecimal mark) {
-        this.stdNo = stdNo;
-        this.courseId = courseId;
-        this.semesterId = semesterId;
-        this.grade = grade;
-        this.mark = mark;
-    }
-
-    public String getStdNo() {
-        return stdNo;
-    }
-
-    public void setStdNo(String stdNo) {
-        this.stdNo = stdNo;
-    }
-
-    public String getCourseId() {
-        return courseId;
-    }
-
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
-    }
-
-    public Integer getSemesterId() {
-        return semesterId;
-    }
-
-    public void setSemesterId(Integer semesterId) {
-        this.semesterId = semesterId;
-    }
-
-    public String getGrade() {
-        return grade;
-    }
-
-    public void setGrade(String grade) {
-        this.grade = grade;
-    }
-
-    public BigDecimal getMark() {
-        return mark;
-    }
-
-    public void setMark(BigDecimal mark) {
-        this.mark = mark;
-    }
-
-    public Student getStudent() {
-        return student;
-    }
-
-    public CourseOffering getCourseOffering() {
-        return courseOffering;
-    }
 }

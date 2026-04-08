@@ -4,9 +4,15 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "Course")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Course {
 
     @Id
@@ -18,37 +24,4 @@ public class Course {
 
     @Column(name = "credits")
     private Integer credits;
-
-    public Course() {
-    }
-
-    public Course(String courseId, String cName, Integer credits) {
-        this.courseId = courseId;
-        this.cName = cName;
-        this.credits = credits;
-    }
-
-    public String getCourseId() {
-        return courseId;
-    }
-
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
-    }
-
-    public String getcName() {
-        return cName;
-    }
-
-    public void setcName(String cName) {
-        this.cName = cName;
-    }
-
-    public Integer getCredits() {
-        return credits;
-    }
-
-    public void setCredits(Integer credits) {
-        this.credits = credits;
-    }
 }
