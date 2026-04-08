@@ -1,5 +1,7 @@
 package com.UniX.repositories;
 
-public class SemesterRepository {
-    
+import com.UniX.entities.Semester;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface SemesterRepository extends JpaRepository<Semester, Integer> {
 }

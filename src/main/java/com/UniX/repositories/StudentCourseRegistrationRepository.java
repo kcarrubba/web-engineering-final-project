@@ -1,5 +1,8 @@
 package com.UniX.repositories;
 
-public class StudentCourseRegistrationRepository {
-    
+import com.UniX.entities.StudentCourseRegistration;
+import com.UniX.entities.StudentCourseRegistrationId;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface StudentCourseRegistrationRepository extends JpaRepository<StudentCourseRegistration, StudentCourseRegistrationId> {
 }

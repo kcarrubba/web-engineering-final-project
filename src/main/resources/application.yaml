@@ -5,6 +5,6 @@ spring:
         show-sql: true
     datasource:
         url: jdbc:mysql://localhost:3306/seng2050
-        username: seng2050_admin
+        username: root
         password: P@ssword
 
