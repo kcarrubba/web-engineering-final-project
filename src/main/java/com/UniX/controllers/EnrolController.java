@@ -32,7 +32,7 @@ import com.UniX.repositories.StudentCourseRegistrationRepository;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/enrol")
+@RequestMapping("/unix/enrol")
 public class EnrolController {
 
     private final StudentCourseRegistrationRepository studentCourseRegistrationRepository;
