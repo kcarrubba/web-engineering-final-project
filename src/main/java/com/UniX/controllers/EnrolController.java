@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.UniX.dtos.EnrolRequest;
 import com.UniX.repositories.SemesterRepository;
+import com.UniX.repositories.StudentCourseRegistrationRepository;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -21,6 +23,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
+import com.UniX.dtos.EnrolRequest;
+import com.UniX.dtos.StudentCourseRegistrationDto;
+import com.UniX.entities.StudentCourseRegistration;
+import com.UniX.repositories.StudentCourseRegistrationRepository;
 
 
 
@@ -29,6 +35,18 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/unix/enrol")
 public class EnrolController {
 
+    private final StudentCourseRegistrationRepository studentCourseRegistrationRepository;
 
+    @PostMapping
+    public StudentCourseRegistrationDto enrol(@Valid @RequestBody EnrolRequest enrolRequest) {
+
+        // Create a registration object and save
+        StudentCourseRegistration studentCourseRegistration = new StudentCourseRegistration(enrolRequest.getStdNo(), enrolRequest.getSemesterId(), enrolRequest.getCourseId());
+        var newRegistration = studentCourseRegistrationRepository.save(studentCourseRegistration);
+
+        // Return a StudentCourseRegistrationDto with the created registration
+        var studentCourseRegistrationDto = new StudentCourseRegistrationDto(newRegistration.getStdNo(), newRegistration.getSemesterId(), newRegistration.getCourseId());
+        return studentCourseRegistrationDto;
+    }
 
 }

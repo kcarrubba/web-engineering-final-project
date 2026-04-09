@@ -50,4 +50,11 @@ public class StudentCourseRegistration {
         @JoinColumn(name = "semesterID", referencedColumnName = "semesterID", insertable = false, updatable = false)
     })
     private CourseOffering courseOffering;
+
+    public StudentCourseRegistration(String stdNo, Integer semesterId, String courseId)
+    {
+        this.stdNo = stdNo;
+        this.semesterId = semesterId;
+        this.courseId = courseId;
+    }
 }

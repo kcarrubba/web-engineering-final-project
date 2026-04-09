@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.UniX.dtos.CourseInSemesterDto;
-import com.UniX.entities.Semester;
+import com.UniX.dtos.SemesterDto;
 import com.UniX.repositories.SemesterRepository;
 import com.UniX.services.CourseOfferingService;
 
@@ -24,8 +24,14 @@ public class SemestersController {
     private final CourseOfferingService courseOfferingService;
 
     @GetMapping
-    public List<Semester> getSemesters() {
-        return semesterRepository.findAll();
+    public List<SemesterDto> getSemestersForEnrolment() {
+        return semesterRepository.findByOpenForEnrolmentTrue().stream()
+                .map(semester -> new SemesterDto(
+                        semester.getSemesterId(),
+                        semester.getSemester(),
+                        semester.getYear()
+                ))
+                .toList();
     }
 
     @GetMapping("/{semesterId}/courses")
