@@ -13,9 +13,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -30,6 +30,30 @@ public class SemestersControllerTest {
 
     @MockBean
     private CourseOfferingService courseOfferingService;
+
+    @Test
+    @DisplayName("GET /unix/semesters returns only semesters open for enrolment")
+    void getSemestersForEnrolment_returnsOpenSemestersOnly() throws Exception {
+        List<Semester> semesters = List.of(
+                new Semester(101, 1, 2026, true),
+                new Semester(102, 2, 2026, true)
+        );
+
+        when(semesterRepository.findByOpenForEnrolmentTrue()).thenReturn(semesters);
+
+        mockMvc.perform(get("/unix/semesters"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].semesterId").value(101))
+                .andExpect(jsonPath("$[0].semester").value(1))
+                .andExpect(jsonPath("$[0].year").value(2026))
+                .andExpect(jsonPath("$[1].semesterId").value(102))
+                .andExpect(jsonPath("$[1].semester").value(2))
+                .andExpect(jsonPath("$[1].year").value(2026));
+
+        verify(semesterRepository).findByOpenForEnrolmentTrue();
+    }
 
     @Test
     @DisplayName("GET /unix/semesters/102/courses returns courses for the semester")
@@ -67,24 +91,5 @@ public class SemestersControllerTest {
                 .andExpect(content().json("[]"));
 
         verify(courseOfferingService).getCoursesBySemesterId(eq(999));
-    }
-
-    @Test
-    @DisplayName("GET /unix/semesters returns all semesters")
-    void getSemesters_returnsAllSemesters() throws Exception {
-        List<Semester> semesters = List.of(
-                new Semester(100, 2, 2025, false),
-                new Semester(101, 1, 2026, true),
-                new Semester(102, 2, 2026, true)
-        );
-
-        when(semesterRepository.findAll()).thenReturn(semesters);
-
-        mockMvc.perform(get("/unix/semesters"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith("application/json"))
-                .andExpect(jsonPath("$.length()").value(3))
-                .andExpect(jsonPath("$[0].semesterId").value(100))
-                .andExpect(jsonPath("$[1].openForEnrolment").value(true));
     }
 }

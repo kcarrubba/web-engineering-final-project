@@ -1,11 +1,74 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>UniX API Test Page</title>
 </head>
 <body>
-    <h1>Hello World!</h1>
+    <h1>UniX API Test Page</h1>
+
+    <h2>API 1: Get semesters</h2>
+    <p>
+        <a href="/unix/semesters" target="_blank">Test GET /unix/semesters</a>
+    </p>
+
+    <h2>API 2: Get courses in semester 102</h2>
+    <p>
+        <a href="/unix/semesters/102/courses" target="_blank">Test GET /unix/semesters/102/courses</a>
+    </p>
+
+    <h2>API 3: Enrol in course</h2>
+
+    <form id="enrolForm">
+        <label for="stdNo">Student No:</label><br>
+        <input type="text" id="stdNo" name="stdNo" value="c0002" required><br><br>
+
+        <label for="semesterId">Semester ID:</label><br>
+        <input type="number" id="semesterId" name="semesterId" value="102" required><br><br>
+
+        <label for="courseId">Course ID:</label><br>
+        <input type="text" id="courseId" name="courseId" value="COMP1140" required><br><br>
+
+        <button type="submit">Enrol</button>
+    </form>
+
+    <h3>Response</h3>
+    <pre id="result"></pre>
+
+    <script>
+        const enrolForm = document.getElementById("enrolForm");
+        const resultBox = document.getElementById("result");
+
+        enrolForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const requestBody = {
+                stdNo: document.getElementById("stdNo").value,
+                semesterId: Number(document.getElementById("semesterId").value),
+                courseId: document.getElementById("courseId").value
+            };
+
+            try {
+                const response = await fetch("/unix/enrol", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const text = await response.text();
+
+                if (response.ok) {
+                    resultBox.textContent = "Success:\n" + text;
+                } else {
+                    resultBox.textContent = "Error " + response.status + ":\n" + text;
+                }
+            } catch (error) {
+                resultBox.textContent = "Request failed:\n" + error;
+            }
+        });
+    </script>
 </body>
 </html>
