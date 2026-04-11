@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Unix Login</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="header">
+        <img src="/images/UniX_Logo.png" alt="UniX Logo" style="width: 80px; height: 80px; border-radius: 50px; ">
+        <h1>Enrolment Dashboard</h1>
+    </div>
+    <div style="text-align: center; margin-top: 100px;">
+        <h2>Student Login</h2>
+        <p id="guideMessage">Please enter your credentials to continue</p>
+        <p style="display: none; color: rgb(228, 0, 0);" id="errorMessage">Invalid username or password. Please try again.</p>
+        <div id="loginForm">
+            <label for="username">Username: </label>
+            <input type="text" id="username" style="border-radius: 50px; padding: 6px;"/>
+            <br><br>
+            <label for="password">Password: </label>
+            <input type="password" id="password" style="border-radius: 50px; padding: 6px;"/>
+            <br><br>
+            <button class="btn" onclick="login()">Sign In</button>
+        </div>
+    </div>
+
+    <script>
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const res = await fetch(`/unix/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include', // Send cookies
+                body: JSON.stringify({ username, password })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                localStorage.setItem('accessToken', data.token);
+                // Redirect to the semester selection page after successful login
+                // As no front-end page, it will redirect to the index page for testing purpose
+                location.href = '/index.html';
+
+            } else {
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('guideMessage').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+
+</html>
