@@ -9,8 +9,8 @@
 **Sprint 2**
 | Member Information            | Front-end for API 1 | Front-end for API 2 | Front-end for API 3 | API 4               | Front-end for API 4 |  Security      | Merge Conflict Resolution  |
 | ----------------------------- | ------------------- | ------------------- | ------------------- | ------------------- | ------------------- | -------------- |  ------------------------  |
-| **Haeun Yang (c3413958)**     | Code Review (0%)    | Develop (0%)        | Code Review (0%)    | Code Review (0%)    | Develop (0%)        |  Develop (0%)  | Resolve Merge Conflict (0%)  |
-| **Kaley Carrubba (c3571255)** | Develop (0%)        | Code Review (0%)    | Develop (0%)        | Develop + Test (0%) | Code Review (0%)    |  Code Review (0%)  | N/A   |
+| **Haeun Yang (c3413958)**     | Code Review (0%)    | Develop (0%)        | Code Review (0%)    | Code Review (0%)    | Develop (100%)        |  Develop (0%)  | Resolve Merge Conflict (0%)  |
+| **Kaley Carrubba (c3571255)** | Develop (0%)        | Code Review (0%)    | Develop (0%)        | Develop + Test (0%) | Code Review (100%)    |  Code Review (0%)  | N/A   |
 
 
 > **Comments:**
