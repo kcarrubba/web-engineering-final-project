@@ -25,9 +25,6 @@ public class Student {
     @Column(name = "givenNames", length = 50)
     private String givenNames;
 
-    @Column(name = "passwordHash", length = 128, nullable = false)
+    @Column(name = "passwordHash", nullable = false)
     private String passwordHash;
-
-    @Column(name = "passwordSalt")
-    private Double passwordSalt;
 }

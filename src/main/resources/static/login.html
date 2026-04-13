@@ -28,7 +28,6 @@
     </div>
 
     <script>
-
         async function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -36,17 +35,14 @@
             const res = await fetch(`/unix/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'include', // Send cookies
+                credentials: 'include',
                 body: JSON.stringify({ username, password })
             });
 
             if (res.ok) {
                 const data = await res.json();
                 localStorage.setItem('accessToken', data.token);
-                // Redirect to the semester selection page after successful login
-                // As no front-end page, it will redirect to the index page for testing purpose
                 location.href = '/index.html';
-
             } else {
                 document.getElementById('errorMessage').style.display = 'block';
                 document.getElementById('guideMessage').style.display = 'none';
