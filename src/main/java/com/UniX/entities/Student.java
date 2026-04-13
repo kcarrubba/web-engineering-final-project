@@ -27,7 +27,4 @@ public class Student {
 
     @Column(name = "passwordHash", nullable = false)
     private String passwordHash;
-
-    @Column(name = "passwordSalt")
-    private String passwordSalt;
 }
