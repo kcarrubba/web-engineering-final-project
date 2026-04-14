@@ -18,6 +18,11 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @GetMapping("/login")
+    public org.springframework.web.servlet.ModelAndView loginPage() {
+        return new org.springframework.web.servlet.ModelAndView("forward:/login.html");
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
