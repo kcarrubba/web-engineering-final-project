@@ -35,7 +35,9 @@ public class JwtService {
     }
 
     public String generateRefreshToken(String stdNo) {
-        return generateToken(stdNo, refreshTokenExpiration, "refresh");
+        String refreshToken = generateToken(stdNo, refreshTokenExpiration, "refresh");
+        refreshTokens.put(refreshToken, stdNo);
+        return refreshToken;
     }
 
     private String generateToken(String stdNo, long expiration, String type) {

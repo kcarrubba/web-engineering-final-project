@@ -8,13 +8,14 @@ import org.springframework.web.bind.annotation.*;
 import com.UniX.dtos.LoginRequest;
 import com.UniX.dtos.LoginResponse;
 import com.UniX.dtos.StudentDto;
-import com.UniX.entities.Student;
 import com.UniX.services.AuthService;
 import com.UniX.services.JwtService;
 import com.UniX.services.StudentService;
 
-import io.jsonwebtoken.Jwts;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -32,10 +33,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         try {
-            LoginResponse response = authService.login(request);
-            return ResponseEntity.ok(response);
+            LoginResponse loginResponse = authService.login(request, response);
+            return ResponseEntity.ok(loginResponse);
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Invalid username or password");
@@ -47,6 +48,28 @@ public class AuthController {
         var token = authToken.replace("Bearer ", "");
         return jwtService.validateAccessToken(token) != null;
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(HttpServletRequest request) {
+        
+        // Find the refreshToken cookie
+        String refreshToken = null;
+        for (Cookie cookie : request.getCookies()) {
+            if (cookie.getName().equals("refreshToken")) {
+                refreshToken = cookie.getValue();
+                break;
+            }
+        }
+
+        if (refreshToken == null) return ResponseEntity.status(401).body("Missing refresh token");
+
+        // Check whether refresh token in valid
+        String username = jwtService.validateRefreshToken(refreshToken);
+        if (username == null) return ResponseEntity.status(401).body("Invalid refresh token");
+
+        String newAccessToken = jwtService.generateAccessToken(username);
+        return ResponseEntity.ok(new LoginResponse(newAccessToken));
+    } 
 
     // New endpoint to get current user info i.e. Student Name & Username (StuNo)
     @GetMapping("/me")
