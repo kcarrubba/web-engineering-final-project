@@ -42,13 +42,13 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/validate")
+    @PostMapping("/unix/validate")
     public boolean validateToken(@RequestHeader("Authorization") String authToken) {
         var token = authToken.replace("Bearer ", "");
         return jwtService.validateAccessToken(token) != null;
     }
 
-    @PostMapping("/refresh")
+    @PostMapping("/unix/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request) {
         
         // Find the refreshToken cookie
@@ -71,7 +71,7 @@ public class AuthController {
     } 
 
     // New endpoint to get current user info i.e. Student Name & Username (StuNo)
-    @GetMapping("/me")
+    @GetMapping("/unix/me")
     public ResponseEntity<StudentDto> me(){
      
         var authentication = SecurityContextHolder.getContext().getAuthentication();

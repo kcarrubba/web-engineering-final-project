@@ -17,8 +17,8 @@
     </div>
 
     <button class="back-btn" onclick="location.href='/semesters.html'">
-        <img src="/images/Arrow_left.png" alt="back"
-            style="width: 30px; height: 30px;"><span style="vertical-align:middle;">Back to Semesters</span></button>
+        <img src="/images/Arrow_left.png" alt="back" style="width: 30px; height: 30px;"><span
+            style="vertical-align:middle;">Back to Semesters</span></button>
 
 
     <div style="text-align: center; margin-top: 50px;">
@@ -34,6 +34,60 @@
     </div>
 
     <script>
+        // Global variable to hold the refresh token promise
+        // prevents multiple simultaneous refresh attempts when several requests fail with 401 at the same time
+        let refreshPromise = null;
+
+        async function refreshToken() {
+            // If there's already a refresh in progress, return the existing promise
+            if (refreshPromise) return refreshPromise;
+
+            refreshPromise = fetch('/unix/refresh', {
+                method: 'POST',
+                credentials: 'include'
+            }).then(async res => {
+                if (res.ok) {
+                    const data = await res.json();
+                    localStorage.setItem('accessToken', data.accessToken);
+                    return data.accessToken;
+                } else {
+                    localStorage.clear();
+                    window.location.href = '/login';
+                    return null;
+                }
+            });
+
+            return refreshPromise;
+        }
+
+        async function fetchWithAuth(url, options = {}) {
+            const token = localStorage.getItem('accessToken');
+
+            const res = await fetch(url, {
+                ...options,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    ...options.headers
+                }
+            });
+
+            // if unauthorized, try refreshing the token and retrying the request once
+            if (res.status === 401) {
+                const newToken = await refreshToken();
+                if (!newToken) return null;
+
+                return fetch(url, {
+                    ...options,
+                    headers: {
+                        'Authorization': `Bearer ${newToken}`,
+                        ...options.headers
+                    }
+                });
+            }
+
+            return res;
+        }
+
         async function loadProfile() {
             const token = localStorage.getItem('accessToken');
             const semester = localStorage.getItem('selectedSemester');
@@ -45,24 +99,14 @@
             }
 
             try {
-                const res = await fetch('/unix/me', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!res.ok) {
-                    throw new Error('Failed to fetch student profile');
-                }
+                const res = await fetchWithAuth('/unix/me', { method: 'GET' });
+                if (!res || !res.ok) throw new Error('Failed to fetch student profile');
 
                 const student = await res.json();
-
-                const profileDiv = document.getElementById('studentProfile');
-                profileDiv.innerHTML = `<p>${student.givenNames} ${student.lastname}</p>
-                                        <p>${student.stdNo}</p>
-                                        <p>Semester ${semester}, ${semesterYear}</p>`;
-
+                document.getElementById('studentProfile').innerHTML = `
+                    <p>${student.givenNames} ${student.lastname}</p>
+                    <p>${student.stdNo}</p>
+                    <p>Semester ${semester}, ${semesterYear}</p>`;
             } catch (error) {
                 document.getElementById('studentProfile').style.display = 'none';
                 console.error(error);
@@ -73,30 +117,14 @@
             const token = localStorage.getItem('accessToken');
             const semesterId = localStorage.getItem('selectedSemesterId');
 
-            if (!semesterId) {
-                window.location.href = '/semesters';
-                return;
-            }
-
-            if (!token) {
-                window.location.href = '/login';
-                return;
-            }
+            if (!semesterId) { window.location.href = '/semesters'; return; }
+            if (!token) { window.location.href = '/login'; return; }
 
             try {
-                const res = await fetch(`/unix/semesters/${semesterId}/courses`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!res.ok) {
-                    throw new Error('Failed to fetch courses');
-                }
+                const res = await fetchWithAuth(`/unix/semesters/${semesterId}/courses`, { method: 'GET' });
+                if (!res || !res.ok) throw new Error('Failed to fetch courses');
 
                 const courses = await res.json();
-
                 const courseListsDiv = document.getElementById('courseLists');
                 const courseGuideMessage = document.getElementById('guideMessage');
 
@@ -105,12 +133,11 @@
                     return;
                 }
                 courseListsDiv.innerHTML = courses.map(course => `
-                    <button class="course-item" onclick="onCourseClick('${course.courseId}')">
-                        <p><strong>${course.courseId}</strong> ${course.courseName}</p>
-                        <p>${course.credits} units</p>
-                    </button>
+                <button class="course-item" onclick="onCourseClick('${course.courseId}')">
+                    <p><strong>${course.courseId}</strong> ${course.courseName}</p>
+                    <p>${course.credits} units</p>
+                </button>
                 `).join('');
-
             } catch (error) {
                 document.getElementById('errorMessage').style.display = 'block';
                 document.getElementById('guideMessage').style.display = 'none';
@@ -118,10 +145,10 @@
                 console.error(error);
             }
         }
-
+        
         function onCourseClick(courseId) {
             localStorage.setItem('selectedCourseId', courseId);
-            location.href = '/unix/course?courseId=' + courseId;
+            location.href = '/course?courseId=' + courseId;
         }
 
         loadProfile();
