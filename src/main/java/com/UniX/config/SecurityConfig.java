@@ -35,6 +35,7 @@ public class SecurityConfig {
                                 "/style.css",
                                 "/images/**",
                                 "/login",
+                                "/unix/login",
                                 "/semesters",
                                 "/courses",
                                 "/course/**"
