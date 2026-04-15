@@ -17,13 +17,17 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/unix/semesters")
 public class SemestersController {
 
     private final SemesterRepository semesterRepository;
     private final CourseOfferingService courseOfferingService;
 
-    @GetMapping
+    @GetMapping("/semesters")
+    public org.springframework.web.servlet.ModelAndView semestersPage() {
+        return new org.springframework.web.servlet.ModelAndView("forward:/semesters.html");
+    }
+    
+    @GetMapping("/unix/semesters")
     public List<SemesterDto> getSemestersForEnrolment() {
         return semesterRepository.findByOpenForEnrolmentTrue().stream()
                 .map(semester -> new SemesterDto(
@@ -34,7 +38,7 @@ public class SemestersController {
                 .toList();
     }
 
-    @GetMapping("/{semesterId}/courses")
+    @GetMapping("/unix/semesters/{semesterId}/courses")
     public ResponseEntity<List<CourseInSemesterDto>> getCoursesInSemester(@PathVariable Integer semesterId) {
         List<CourseInSemesterDto> courses = courseOfferingService.getCoursesBySemesterId(semesterId);
         return ResponseEntity.ok(courses);

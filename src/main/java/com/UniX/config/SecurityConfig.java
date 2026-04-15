@@ -31,9 +31,13 @@ public class SecurityConfig {
                                 "/login.html",
                                 "semesters.html",
                                 "courses.html",
+                                "courseDetails.html",
                                 "/style.css",
                                 "/images/**",
-                                "/unix/login"
+                                "/login",
+                                "/semesters",
+                                "/courses",
+                                "/course/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 );

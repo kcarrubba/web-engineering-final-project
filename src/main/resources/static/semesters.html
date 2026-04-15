@@ -9,8 +9,10 @@
 
 <body>
     <div class="header">
-        <img src="/images/UniX_Logo.png" alt="UniX Logo" style="width: 80px; height: 80px; border-radius: 50px;">
-        <h1>Enrolment Dashboard</h1>
+        <div class="header-left">
+            <img src="/images/UniX_Logo.png" alt="UniX Logo" style="width: 80px; height: 80px; border-radius: 50px;">
+            <h1>Enrolment Dashboard</h1>
+        </div>
     </div>
 
     <div style="text-align: center; margin-top: 100px;">
@@ -36,7 +38,7 @@
             const token = localStorage.getItem('accessToken');
 
             if (!token) {
-                window.location.href = '/login.html';
+                window.location.href = '/login';
                 return;
             }
 
@@ -101,7 +103,7 @@
             localStorage.setItem('selectedYear', selectedOption.dataset.year);
 
             // Route to API 2 front end
-            window.location.href = '/courses.html';
+            window.location.href = 'unix/courses';
         }
 
         loadSemesters();

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>UniX Select Semester</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img src="/images/UniX_Logo.png" alt="UniX Logo" style="width: 80px; height: 80px; border-radius: 50px;">
+            <h1>Enrolment Dashboard</h1>
+        </div>
+        <div id="studentProfile" class="header-right"></div>
+    </div>
+
+    <button class="back-btn" onclick="location.href='/semesters.html'">
+        <img src="/images/Arrow_left.png" alt="back"
+            style="width: 30px; height: 30px;"><span style="vertical-align:middle;">Back to Semesters</span></button>
+
+
+    <div style="text-align: center; margin-top: 50px;">
+        <h2>Select Course</h2>
+        <p id="guideMessage">Choose a course from the list below to continue.</p>
+        <p id="errorMessage" style="display: none; color: rgb(228, 0, 0);">
+            Unable to load courses. Please try again.
+        </p>
+    </div>
+
+    <div style="margin: 30px 40px 0 40px;display: flex; flex-direction: column; align-items: center;">
+        <div id="courseLists"></div>
+    </div>
+
+    <script>
+        async function loadProfile() {
+            const token = localStorage.getItem('accessToken');
+            const semester = localStorage.getItem('selectedSemester');
+            const semesterYear = localStorage.getItem('selectedYear');
+
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            try {
+                const res = await fetch('/unix/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error('Failed to fetch student profile');
+                }
+
+                const student = await res.json();
+
+                const profileDiv = document.getElementById('studentProfile');
+                profileDiv.innerHTML = `<p>${student.givenNames} ${student.lastname}</p>
+                                        <p>${student.stdNo}</p>
+                                        <p>Semester ${semester}, ${semesterYear}</p>`;
+
+            } catch (error) {
+                document.getElementById('studentProfile').style.display = 'none';
+                console.error(error);
+            }
+        }
+
+        async function loadCourses() {
+            const token = localStorage.getItem('accessToken');
+            const semesterId = localStorage.getItem('selectedSemesterId');
+
+            if (!semesterId) {
+                window.location.href = '/semesters';
+                return;
+            }
+
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            try {
+                const res = await fetch(`/unix/semesters/${semesterId}/courses`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error('Failed to fetch courses');
+                }
+
+                const courses = await res.json();
+
+                const courseListsDiv = document.getElementById('courseLists');
+                const courseGuideMessage = document.getElementById('guideMessage');
+
+                if (courses.length === 0) {
+                    courseGuideMessage.textContent = 'No courses available for the selected semester.';
+                    return;
+                }
+                courseListsDiv.innerHTML = courses.map(course => `
+                    <button class="course-item" onclick="onCourseClick('${course.courseId}')">
+                        <p><strong>${course.courseId}</strong> ${course.courseName}</p>
+                        <p>${course.credits} units</p>
+                    </button>
+                `).join('');
+
+            } catch (error) {
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('guideMessage').style.display = 'none';
+                document.getElementById('courseLists').style.display = 'none';
+                console.error(error);
+            }
+        }
+
+        function onCourseClick(courseId) {
+            localStorage.setItem('selectedCourseId', courseId);
+            location.href = '/unix/course?courseId=' + courseId;
+        }
+
+        loadProfile();
+        loadCourses();
+    </script>
+</body>
+
+</html>

@@ -20,7 +20,6 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/unix")
 public class AuthController {
 
     private final AuthService authService;
@@ -32,7 +31,7 @@ public class AuthController {
         return new org.springframework.web.servlet.ModelAndView("forward:/login.html");
     }
 
-    @PostMapping("/login")
+    @PostMapping("/unix/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         try {
             LoginResponse loginResponse = authService.login(request, response);

@@ -21,12 +21,11 @@ import com.UniX.entities.StudentCourseRegistration;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/unix/enrol")
 public class EnrolController {
 
     private final StudentCourseRegistrationRepository studentCourseRegistrationRepository;
 
-    @PostMapping
+    @PostMapping("/unix/enrol")
     public StudentCourseRegistrationDto enrol(@Valid @RequestBody EnrolRequest enrolRequest) {
 
         // Create a registration object and save
