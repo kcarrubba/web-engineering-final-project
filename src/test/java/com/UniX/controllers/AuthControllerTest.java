@@ -2,6 +2,7 @@ package com.UniX.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,9 @@ import org.springframework.http.ResponseEntity;
 import com.UniX.dtos.LoginRequest;
 import com.UniX.dtos.LoginResponse;
 import com.UniX.services.AuthService;
+
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthControllerTest {
@@ -31,22 +35,20 @@ public class AuthControllerTest {
         request.setUsername("c0002");
         request.setPassword("myPassword");
 
-        LoginResponse response = new LoginResponse(
-                "access-token-value",
-                "access-token-value",
-                "refresh-token-value"
+        HttpServletResponse httpResponse = mock(HttpServletResponse.class);
+
+        LoginResponse loginResponse = new LoginResponse(
+                "access-token-value"
         );
 
-        when(authService.login(request)).thenReturn(response);
+        when(authService.login(request, httpResponse)).thenReturn(loginResponse);
 
-        ResponseEntity<?> result = authController.login(request);
+        ResponseEntity<?> result = authController.login(request, httpResponse);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
 
         LoginResponse body = (LoginResponse) result.getBody();
-        assertEquals("access-token-value", body.getToken());
         assertEquals("access-token-value", body.getAccessToken());
-        assertEquals("refresh-token-value", body.getRefreshToken());
     }
 
     @Test
@@ -55,9 +57,11 @@ public class AuthControllerTest {
         request.setUsername("c0002");
         request.setPassword("wrongPassword");
 
-        when(authService.login(request)).thenThrow(new RuntimeException("Invalid username or password"));
+        HttpServletResponse httpResponse = mock(HttpServletResponse.class);
 
-        ResponseEntity<?> result = authController.login(request);
+        when(authService.login(request, httpResponse)).thenThrow(new RuntimeException("Invalid username or password"));
+
+        ResponseEntity<?> result = authController.login(request, httpResponse);
 
         assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
         assertEquals("Invalid username or password", result.getBody());
