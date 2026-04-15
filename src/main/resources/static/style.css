@@ -9,6 +9,13 @@ body {
     gap: 20px;
     padding: 20px;
     background-color: #09a3b4;
+    justify-content: space-between;
+}
+
+.header-left {
+    display: flex;
+    gap: 20px;
+    align-items: center;
 }
 
 .btn {
@@ -20,6 +27,23 @@ body {
 
 .btn:hover {
     background-color: #09a3b4;
+}
+
+.back-btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+    margin-left: 20px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+}
+
+.back-btn:hover {
+    text-decoration: underline;
 }
 
 .semester-select {
@@ -34,4 +58,40 @@ body {
 
 .semester-select:focus {
     outline: none;
+}
+
+#studentProfile {
+    background-color: white;
+    text-align: right;
+    border-radius: 5px;
+    padding: 0px 10px 0px 30px;
+}
+
+#studentProfile p {
+    margin: 5px 0;
+}
+
+#courseLists {
+    border-radius: 10px;
+    width: 100%;
+    background-color: white;
+    max-height: 400px;
+    max-width: 600px;
+    overflow-y: auto;
+}
+
+.course-item {
+    width: 100%;
+    background-color: white;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 15px;
+    gap: 20px;
+    border: 0;
+    border-bottom: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.course-item:hover {
+    background-color: #86CDD8;
 }

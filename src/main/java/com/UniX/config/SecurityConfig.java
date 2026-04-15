@@ -10,6 +10,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.http.HttpMethod;
 
@@ -23,6 +26,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .requiresChannel(channel -> channel.anyRequest().requiresSecure())
+                .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                    })
+                )
                 .sessionManagement(c ->
                     c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
@@ -31,9 +39,15 @@ public class SecurityConfig {
                                 "/login.html",
                                 "semesters.html",
                                 "courses.html",
+                                "courseDetails.html",
                                 "/style.css",
                                 "/images/**",
-                                "/unix/login"
+                                "/login",
+                                "/unix/login",
+                                "/unix/refresh",
+                                "/semesters",
+                                "/courses",
+                                "/course/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 );

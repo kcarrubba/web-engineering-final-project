@@ -9,8 +9,10 @@
 
 <body>
     <div class="header">
-        <img src="/images/UniX_Logo.png" alt="UniX Logo" style="width: 80px; height: 80px; border-radius: 50px; ">
-        <h1>Enrolment Dashboard</h1>
+        <div class="header-left">
+            <img src="/images/UniX_Logo.png" alt="UniX Logo" style="width: 80px; height: 80px; border-radius: 50px; ">
+            <h1>Enrolment Dashboard</h1>
+        </div>
     </div>
     <div style="text-align: center; margin-top: 100px;">
         <h2>Student Login</h2>
@@ -42,7 +44,7 @@
             if (res.ok) {
                 const data = await res.json();
                 localStorage.setItem('accessToken', data.accessToken);
-                location.href = '/semesters.html';
+                location.href = '/semesters';
             } else {
                 document.getElementById('errorMessage').style.display = 'block';
                 document.getElementById('guideMessage').style.display = 'none';
