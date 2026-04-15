@@ -21,3 +21,17 @@ body {
 .btn:hover {
     background-color: #09a3b4;
 }
+
+.semester-select {
+    width: 320px;
+    padding: 12px;
+    font-size: 16px;
+    border: 2px solid black;
+    border-radius: 12px;
+    background-color: white;
+    cursor: pointer;
+}
+
+.semester-select:focus {
+    outline: none;
+}

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>UniX Select Semester</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="header">
+        <img src="/images/UniX_Logo.png" alt="UniX Logo" style="width: 80px; height: 80px; border-radius: 50px;">
+        <h1>Enrolment Dashboard</h1>
+    </div>
+
+    <div style="text-align: center; margin-top: 100px;">
+        <h2>Select Semester</h2>
+        <p id="guideMessage">Only semesters open for enrolment can be selected.</p>
+        <p id="errorMessage" style="display: none; color: rgb(228, 0, 0);">
+            Unable to load semesters. Please try again.
+        </p>
+
+        <div style="margin-top: 30px;">
+            <select id="semesterDropdown" class="semester-select">
+                <option value="">Loading semesters...</option>
+            </select>
+        </div>
+
+        <div style="margin-top: 35px;">
+            <button class="btn" onclick="continueToNextPage()">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        async function loadSemesters() {
+            const token = localStorage.getItem('accessToken');
+
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            try {
+                const res = await fetch('/unix/semesters', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error('Failed to fetch semesters');
+                }
+
+                const semesters = await res.json();
+                const dropdown = document.getElementById('semesterDropdown');
+
+                dropdown.innerHTML = '';
+
+                if (semesters.length === 0) {
+                    dropdown.innerHTML = '<option value="">No semesters available</option>';
+                    dropdown.disabled = true;
+                    return;
+                }
+
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select a semester';
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                dropdown.appendChild(defaultOption);
+
+                semesters.forEach(semesterObj => {
+                    const option = document.createElement('option');
+                    option.value = semesterObj.semesterId;
+                    option.textContent = `Semester ${semesterObj.semester}, ${semesterObj.year}`;
+                    option.dataset.semester = semesterObj.semester;
+                    option.dataset.year = semesterObj.year;
+                    dropdown.appendChild(option);
+                });
+
+            } catch (error) {
+                document.getElementById('guideMessage').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('semesterDropdown').style.display = 'none';
+                console.error(error);
+            }
+        }
+
+        function continueToNextPage() {
+            const dropdown = document.getElementById('semesterDropdown');
+            const selectedOption = dropdown.options[dropdown.selectedIndex];
+
+            if (!dropdown.value) {
+                alert('Please select a semester.');
+                return;
+            }
+
+            localStorage.setItem('selectedSemesterId', dropdown.value);
+            localStorage.setItem('selectedSemester', selectedOption.dataset.semester);
+            localStorage.setItem('selectedYear', selectedOption.dataset.year);
+
+            // Route to API 2 front end
+            window.location.href = '/courses.html';
+        }
+
+        loadSemesters();
+    </script>
+</body>
+
+</html>
