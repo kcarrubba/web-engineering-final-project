@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>UniX Course Details</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img src="/images/UniX_Logo.png" alt="UniX Logo" style="width: 80px; height: 80px; border-radius: 50px;">
+            <h1>Enrolment Dashboard</h1>
+        </div>
+        <div id="studentProfile"></div>
+    </div>
+
+    <button class="back-btn" onclick="location.href='/courses'">
+        <img src="/images/Arrow_left.png" alt="back" style="width: 30px; height: 30px;">
+        <span>Back to Courses</span>
+    </button>
+
+    <div style="text-align: center; margin-top: 40px;">
+        <h2>Course Details</h2>
+        <p id="guideMessage">Review the course details and enrol below.</p>
+        <p id="errorMessage" style="display: none; color: red;">Failed to load course details.</p>
+        <p id="successMessage" style="display: none; color: green;">Successfully enrolled!</p>
+    </div>
+
+    <div style="display: flex; justify-content: center; margin-top: 30px;">
+        <div id="detailsCard" class="details-card" style="display:none;">
+            <div class="detail-row">
+                <span class="detail-label">Course ID</span>
+                <span id="courseId"></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Course Name</span>
+                <span id="courseName"></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Credits</span>
+                <span id="credits"></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Max Capacity</span>
+                <span id="capacity"></span>
+            </div>
+
+            <div style="text-align: center; margin-top: 25px;">
+                <button id="enrolBtn" class="btn" onclick="enrol()">Enrol</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let refreshPromise = null;
+        let studentNo = null;
+        let courseId = null;
+
+        async function refreshToken() {
+            if (refreshPromise) return refreshPromise;
+
+            refreshPromise = fetch('/unix/refresh', {
+                method: 'POST',
+                credentials: 'include'
+            }).then(async res => {
+                if (res.ok) {
+                    const data = await res.json();
+                    localStorage.setItem('accessToken', data.accessToken);
+                    return data.accessToken;
+                } else {
+                    localStorage.clear();
+                    window.location.href = '/login';
+                }
+            });
+
+            return refreshPromise;
+        }
+
+        async function fetchWithAuth(url, options = {}) {
+            const token = localStorage.getItem('accessToken');
+
+            let res = await fetch(url, {
+                ...options,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    ...options.headers
+                },
+                credentials: 'include'
+            });
+
+            if (res.status === 401) {
+                const newToken = await refreshToken();
+                res = await fetch(url, {
+                    ...options,
+                    headers: {
+                        'Authorization': `Bearer ${newToken}`,
+                        ...options.headers
+                    },
+                    credentials: 'include'
+                });
+            }
+
+            return res;
+        }
+
+        async function loadProfile() {
+            const res = await fetchWithAuth('/unix/me');
+
+            if (!res.ok) return;
+
+            const student = await res.json();
+            studentNo = student.stdNo;
+
+            const sem = localStorage.getItem('selectedSemester');
+            const year = localStorage.getItem('selectedYear');
+
+            document.getElementById('studentProfile').innerHTML = `
+                <p>${student.givenNames} ${student.lastname}</p>
+                <p>${student.stdNo}</p>
+                <p>Semester ${sem}, ${year}</p>
+            `;
+        }
+
+        async function loadCourse() {
+            const params = new URLSearchParams(window.location.search);
+            courseId = params.get('courseId');
+            const semesterId = localStorage.getItem('selectedSemesterId');
+
+            if (!courseId || !semesterId) {
+                window.location.href = '/courses';
+                return;
+            }
+
+            try {
+                const res = await fetchWithAuth(`/unix/semesters/${semesterId}/courses`);
+                const courses = await res.json();
+
+                const course = courses.find(c => c.courseId === courseId);
+
+                document.getElementById('courseId').textContent = course.courseId;
+                document.getElementById('courseName').textContent = course.courseName;
+                document.getElementById('credits').textContent = course.credits;
+                document.getElementById('capacity').textContent = course.maxCapacity;
+
+                document.getElementById('detailsCard').style.display = 'block';
+
+            } catch (err) {
+                document.getElementById('guideMessage').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        }
+
+        async function enrol() {
+            const semesterId = localStorage.getItem('selectedSemesterId');
+
+            const btn = document.getElementById('enrolBtn');
+            btn.disabled = true;
+            btn.textContent = 'Enrolling...';
+
+            const res = await fetchWithAuth('/unix/enrol', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    stdNo: studentNo,
+                    semesterId: Number(semesterId),
+                    courseId: courseId
+                })
+            });
+
+            if (res.ok) {
+                document.getElementById('successMessage').style.display = 'block';
+                btn.textContent = 'Enrolled';
+            } else {
+                btn.disabled = false;
+                btn.textContent = 'Enrol';
+                alert('Failed to enrol.');
+            }
+        }
+
+        loadProfile();
+        loadCourse();
+    </script>
+</body>
+
+</html>

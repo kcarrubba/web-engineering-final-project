@@ -95,3 +95,30 @@ body {
 .course-item:hover {
     background-color: #86CDD8;
 }
+
+.details-card {
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 12px;
+    width: 500px;
+    padding: 25px 30px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #ccc;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: bold;
+}
+
+.detail-value {
+    text-align: right;
+}
