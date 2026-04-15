@@ -41,8 +41,8 @@
 
             if (res.ok) {
                 const data = await res.json();
-                localStorage.setItem('accessToken', data.token);
-                location.href = '/index.html';
+                localStorage.setItem('accessToken', data.accessToken);
+                location.href = '/semesters.html';
             } else {
                 document.getElementById('errorMessage').style.display = 'block';
                 document.getElementById('guideMessage').style.display = 'none';
