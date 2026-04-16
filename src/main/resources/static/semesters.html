@@ -34,6 +34,58 @@
     </div>
 
     <script>
+        // Prevent multiple refresh calls at the same time
+        let refreshPromise = null;
+
+        async function refreshToken() {
+            if (refreshPromise) return refreshPromise;
+
+            refreshPromise = fetch('/unix/refresh', {
+                method: 'POST',
+                credentials: 'include'
+            }).then(async res => {
+                if (res.ok) {
+                    const data = await res.json();
+                    localStorage.setItem('accessToken', data.accessToken);
+                    return data.accessToken;
+                } else {
+                    localStorage.clear();
+                    window.location.href = '/login';
+                    return null;
+                }
+            });
+
+            return refreshPromise;
+        }
+
+        async function fetchWithAuth(url, options = {}) {
+            const token = localStorage.getItem('accessToken');
+
+            const res = await fetch(url, {
+                ...options,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    ...options.headers
+                }
+            });
+
+            // If token expired → refresh + retry once
+            if (res.status === 401) {
+                const newToken = await refreshToken();
+                if (!newToken) return null;
+
+                return fetch(url, {
+                    ...options,
+                    headers: {
+                        'Authorization': `Bearer ${newToken}`,
+                        ...options.headers
+                    }
+                });
+            }
+
+            return res;
+        }
+
         async function loadSemesters() {
             const token = localStorage.getItem('accessToken');
 
@@ -43,14 +95,11 @@
             }
 
             try {
-                const res = await fetch('/unix/semesters', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                const res = await fetchWithAuth('/unix/semesters', {
+                    method: 'GET'
                 });
 
-                if (!res.ok) {
+                if (!res || !res.ok) {
                     throw new Error('Failed to fetch semesters');
                 }
 
@@ -102,7 +151,6 @@
             localStorage.setItem('selectedSemester', selectedOption.dataset.semester);
             localStorage.setItem('selectedYear', selectedOption.dataset.year);
 
-            // Route to API 2 front end
             window.location.href = '/courses';
         }
 
