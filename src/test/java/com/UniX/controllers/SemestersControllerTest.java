@@ -4,11 +4,15 @@ import com.UniX.dtos.CourseInSemesterDto;
 import com.UniX.entities.Semester;
 import com.UniX.repositories.SemesterRepository;
 import com.UniX.services.CourseOfferingService;
+import com.UniX.services.JwtService;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -20,6 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(SemestersController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class SemestersControllerTest {
 
     @Autowired
@@ -30,6 +35,12 @@ public class SemestersControllerTest {
 
     @MockBean
     private CourseOfferingService courseOfferingService;
+
+    @MockBean
+    private JwtService jwtService;
+    
+    @MockBean
+    private UserDetailsService userDetailsService;
 
     @Test
     @DisplayName("GET /unix/semesters returns only semesters open for enrolment")

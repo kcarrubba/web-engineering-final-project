@@ -1,40 +1,28 @@
 package com.UniX.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
-
 import com.UniX.dtos.EnrolRequest;
-import com.UniX.repositories.StudentCourseRegistrationRepository;
-
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
 import com.UniX.dtos.StudentCourseRegistrationDto;
-import com.UniX.entities.StudentCourseRegistration;
-
-
+import com.UniX.services.EnrolService;;
 
 @RestController
 @AllArgsConstructor
 public class EnrolController {
-
-    private final StudentCourseRegistrationRepository studentCourseRegistrationRepository;
+    private final EnrolService enrolService;
 
     @PostMapping("/unix/enrol")
-    public StudentCourseRegistrationDto enrol(@Valid @RequestBody EnrolRequest enrolRequest) {
-
-        // Create a registration object and save
-        StudentCourseRegistration studentCourseRegistration = new StudentCourseRegistration(enrolRequest.getStdNo(), enrolRequest.getSemesterId(), enrolRequest.getCourseId());
-        var newRegistration = studentCourseRegistrationRepository.save(studentCourseRegistration);
-
-        // Return a StudentCourseRegistrationDto with the created registration
-        var studentCourseRegistrationDto = new StudentCourseRegistrationDto(newRegistration.getStdNo(), newRegistration.getSemesterId(), newRegistration.getCourseId());
-        return studentCourseRegistrationDto;
+    public ResponseEntity<?> enrol(@Valid @RequestBody EnrolRequest enrolRequest) {
+        try {
+            StudentCourseRegistrationDto result = enrolService.enrol(enrolRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
-
 }
