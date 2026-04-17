@@ -28,7 +28,7 @@ public class EnrolControllerTest {
     private EnrolController enrolController;
 
     @Test
-    public void testEnrol() {
+    public void testEnrolSuccess() {
 
         EnrolRequest request = new EnrolRequest("c0002", 102, "COMP1140");
 
@@ -46,6 +46,22 @@ public class EnrolControllerTest {
         assertEquals(102, body.getSemesterId());
         assertEquals("COMP1140", body.getCourseId());
         assertEquals("", body.getWarningMessage());
+        verify(enrolService, times(1)).enrol(any(EnrolRequest.class));
+    }
+
+    @Test
+    public void testEnrolFailure() {
+
+        EnrolRequest request = new EnrolRequest("c0002", 102, "COMP1140");
+
+        when(enrolService.enrol(any(EnrolRequest.class)))
+        .thenThrow(new RuntimeException("Student is already enrolled in this course for the semester"));
+
+        ResponseEntity<?> response = enrolController.enrol(request);
+
+        // Verify the result
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Student is already enrolled in this course for the semester", response.getBody());
         verify(enrolService, times(1)).enrol(any(EnrolRequest.class));
     }
 }
