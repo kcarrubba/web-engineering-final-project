@@ -5,13 +5,12 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.UniX.dtos.CourseInSemesterDto;
 import com.UniX.dtos.SemesterDto;
-import com.UniX.repositories.SemesterRepository;
 import com.UniX.services.CourseOfferingService;
+import com.UniX.services.SemesterService;
 
 import lombok.AllArgsConstructor;
 
@@ -19,7 +18,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class SemestersController {
 
-    private final SemesterRepository semesterRepository;
+    private final SemesterService semesterService;
     private final CourseOfferingService courseOfferingService;
 
     @GetMapping("/semesters")
@@ -29,13 +28,7 @@ public class SemestersController {
     
     @GetMapping("/unix/semesters")
     public List<SemesterDto> getSemestersForEnrolment() {
-        return semesterRepository.findByOpenForEnrolmentTrue().stream()
-                .map(semester -> new SemesterDto(
-                        semester.getSemesterId(),
-                        semester.getSemester(),
-                        semester.getYear()
-                ))
-                .toList();
+        return semesterService.getSemesters(); 
     }
 
     @GetMapping("/unix/semesters/{semesterId}/courses")
