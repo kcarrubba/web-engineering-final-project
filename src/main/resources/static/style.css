@@ -72,12 +72,10 @@ body {
 }
 
 #courseLists {
-    border-radius: 10px;
-    width: 100%;
-    background-color: white;
-    max-height: 400px;
-    max-width: 600px;
-    overflow-y: auto;
+    background-color: transparent;
+    max-height: none;
+    max-width: none;
+    overflow: visible;
 }
 
 .course-item {
