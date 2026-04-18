@@ -33,7 +33,13 @@ public class SemestersController {
 
     @GetMapping("/unix/semesters/{semesterId}/courses")
     public ResponseEntity<List<CourseInSemesterDto>> getCoursesInSemester(@PathVariable Integer semesterId) {
-        List<CourseInSemesterDto> courses = courseOfferingService.getCoursesBySemesterId(semesterId);
+        var authentication = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        String stdNo = (String) authentication.getPrincipal();
+
+        List<CourseInSemesterDto> courses = courseOfferingService.getCoursesBySemesterId(semesterId, stdNo);
         return ResponseEntity.ok(courses);
     }
 }

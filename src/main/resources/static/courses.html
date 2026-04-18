@@ -5,6 +5,51 @@
     <meta charset="UTF-8">
     <title>UniX Select Semester</title>
     <link rel="stylesheet" href="/style.css">
+    <style>
+        .course-columns {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            width: 100%;
+            max-width: 1300px;
+            align-items: flex-start;
+            flex-wrap: nowrap;
+            background-color: transparent;
+        }
+
+        .course-panel {
+            background-color: white;
+            border: 2px solid black;
+            border-radius: 12px;
+            width: 520px;
+            overflow: hidden;
+        }
+
+        .course-panel h3 {
+            text-align: center;
+            margin: 20px 0 10px 0;
+            font-size: 22px;
+        }
+
+        .course-list {
+            width: 100%;
+        }
+
+        .empty-list-message {
+            text-align: center;
+            padding: 25px 20px 30px 20px;
+            color: #555;
+        }
+
+        #courseLists {
+            background-color: transparent !important;
+            max-height: none !important;
+            max-width: none !important;
+            overflow: visible !important;
+            border-radius: 0 !important;
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body>
@@ -17,29 +62,26 @@
     </div>
 
     <button class="back-btn" onclick="location.href='/semesters'">
-        <img src="/images/Arrow_left.png" alt="back" style="width: 30px; height: 30px;"><span
-            style="vertical-align:middle;">Back to Semesters</span></button>
-
+        <img src="/images/Arrow_left.png" alt="back" style="width: 30px; height: 30px;">
+        <span style="vertical-align:middle;">Back to Semesters</span>
+    </button>
 
     <div style="text-align: center; margin-top: 50px;">
-        <h2>Select Course</h2>
-        <p id="guideMessage">Choose a course from the list below to continue.</p>
+        <h2>Enrolments</h2>
+        <p id="guideMessage">Choose a course below to view details and enrol.</p>
         <p id="errorMessage" style="display: none; color: rgb(228, 0, 0);">
             Unable to load courses. Please try again.
         </p>
     </div>
 
-    <div style="margin: 30px 40px 100px 40px;display: flex; flex-direction: column; align-items: center;">
-        <div id="courseLists"></div>
+    <div style="margin: 30px 40px 100px 40px; display: flex; flex-direction: column; align-items: center;">
+        <div id="courseLists" class="course-columns"></div>
     </div>
 
     <script>
-        // Global variable to hold the refresh token promise
-        // prevents multiple simultaneous refresh attempts when several requests fail with 401 at the same time
         let refreshPromise = null;
 
         async function refreshToken() {
-            // If there's already a refresh in progress, return the existing promise
             if (refreshPromise) return refreshPromise;
 
             refreshPromise = fetch('/unix/refresh', {
@@ -71,7 +113,6 @@
                 }
             });
 
-            // if unauthorized, try refreshing the token and retrying the request once
             if (res.status === 401) {
                 const newToken = await refreshToken();
                 if (!newToken) return null;
@@ -113,12 +154,36 @@
             }
         }
 
+        function renderCourseButtons(courses) {
+            if (!courses || courses.length === 0) {
+                return `<p class="empty-list-message">No courses in this list.</p>`;
+            }
+
+            return `
+                <div class="course-list">
+                    ${courses.map(course => `
+                        <button class="course-item" onclick="onCourseClick('${course.courseId}')">
+                            <p><strong>${course.courseId}</strong> ${course.courseName}</p>
+                            <p>${course.credits} units</p>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        }
+
         async function loadCourses() {
             const token = localStorage.getItem('accessToken');
             const semesterId = localStorage.getItem('selectedSemesterId');
 
-            if (!semesterId) { window.location.href = '/semesters'; return; }
-            if (!token) { window.location.href = '/login'; return; }
+            if (!semesterId) {
+                window.location.href = '/semesters';
+                return;
+            }
+
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
 
             try {
                 const res = await fetchWithAuth(`/unix/semesters/${semesterId}/courses`, { method: 'GET' });
@@ -132,12 +197,21 @@
                     courseGuideMessage.textContent = 'No courses available for the selected semester.';
                     return;
                 }
-                courseListsDiv.innerHTML = courses.map(course => `
-                <button class="course-item" onclick="onCourseClick('${course.courseId}')">
-                    <p><strong>${course.courseId}</strong> ${course.courseName}</p>
-                    <p>${course.credits} units</p>
-                </button>
-                `).join('');
+
+                const currentEnrolments = courses.filter(course => course.alreadyEnrolled);
+                const availableEnrolments = courses.filter(course => !course.alreadyEnrolled);
+
+                courseListsDiv.innerHTML = `
+                    <div class="course-panel">
+                        <h3>Current Enrolments</h3>
+                        ${renderCourseButtons(currentEnrolments)}
+                    </div>
+
+                    <div class="course-panel">
+                        <h3>Available Enrolments</h3>
+                        ${renderCourseButtons(availableEnrolments)}
+                    </div>
+                `;
             } catch (error) {
                 document.getElementById('errorMessage').style.display = 'block';
                 document.getElementById('guideMessage').style.display = 'none';
@@ -145,7 +219,7 @@
                 console.error(error);
             }
         }
-        
+
         function onCourseClick(courseId) {
             localStorage.setItem('selectedCourseId', courseId);
             location.href = '/course?courseId=' + courseId;
