@@ -13,10 +13,13 @@ public class StudentCourseRegistrationDto {
 
     private Integer semesterId;
 
-    public StudentCourseRegistrationDto(String stdNo, Integer semesterId, String courseId)
+    private String warningMessage;
+
+    public StudentCourseRegistrationDto(String stdNo, Integer semesterId, String courseId, String warningMessage)
     {
         this.stdNo = stdNo;
         this.semesterId = semesterId;
         this.courseId = courseId;
+        this.warningMessage = warningMessage;
     }
 }
