@@ -5,6 +5,33 @@
     <meta charset="UTF-8">
     <title>UniX Course Details</title>
     <link rel="stylesheet" href="/style.css">
+    <style>
+        .message {
+            display: none;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .message.success {
+            color: green;
+        }
+
+        .message.error {
+            color: red;
+        }
+
+        .btn:disabled {
+            background-color: #cfcfcf;
+            cursor: not-allowed;
+            color: #666;
+        }
+
+        .detail-value {
+            text-align: right;
+            max-width: 260px;
+            word-wrap: break-word;
+        }
+    </style>
 </head>
 
 <body>
@@ -24,27 +51,34 @@
     <div style="text-align: center; margin-top: 40px;">
         <h2>Course Details</h2>
         <p id="guideMessage">Review the course details and enrol below.</p>
-        <p id="errorMessage" style="display: none; color: red;">Failed to load course details.</p>
-        <p id="successMessage" style="display: none; color: green;">Successfully enrolled!</p>
+        <p id="pageMessage" class="message"></p>
     </div>
 
     <div style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 100px;">
         <div id="detailsCard" class="details-card" style="display:none;">
             <div class="detail-row">
                 <span class="detail-label">Course ID</span>
-                <span id="courseId"></span>
+                <span id="courseId" class="detail-value"></span>
             </div>
             <div class="detail-row">
                 <span class="detail-label">Course Name</span>
-                <span id="courseName"></span>
+                <span id="courseName" class="detail-value"></span>
             </div>
             <div class="detail-row">
                 <span class="detail-label">Credits</span>
-                <span id="credits"></span>
+                <span id="credits" class="detail-value"></span>
             </div>
             <div class="detail-row">
-                <span class="detail-label">Max Capacity</span>
-                <span id="capacity"></span>
+                <span class="detail-label">Seats Available</span>
+                <span id="seatsAvailable" class="detail-value"></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Prerequisites</span>
+                <span id="prerequisites" class="detail-value"></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Assumed Knowledge</span>
+                <span id="assumedKnowledge" class="detail-value"></span>
             </div>
 
             <div style="text-align: center; margin-top: 25px;">
@@ -57,6 +91,40 @@
         let refreshPromise = null;
         let studentNo = null;
         let courseId = null;
+        let selectedCourse = null;
+
+        function showMessage(message, type) {
+            const messageEl = document.getElementById('pageMessage');
+            messageEl.textContent = message;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+        }
+
+        function formatList(items) {
+            if (!items || items.length === 0) {
+                return 'None';
+            }
+            return items.join(', ');
+        }
+
+        function updateEnrolButton(course) {
+            const btn = document.getElementById('enrolBtn');
+
+            if (course.alreadyEnrolled) {
+                btn.disabled = true;
+                btn.textContent = 'Already Enrolled';
+                return;
+            }
+
+            if (course.seatsAvailable <= 0) {
+                btn.disabled = true;
+                btn.textContent = 'No Seats Available';
+                return;
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Enrol';
+        }
 
         async function refreshToken() {
             if (refreshPromise) return refreshPromise;
@@ -72,6 +140,7 @@
                 } else {
                     localStorage.clear();
                     window.location.href = '/login';
+                    return null;
                 }
             });
 
@@ -92,6 +161,8 @@
 
             if (res.status === 401) {
                 const newToken = await refreshToken();
+                if (!newToken) return null;
+
                 res = await fetch(url, {
                     ...options,
                     headers: {
@@ -108,7 +179,7 @@
         async function loadProfile() {
             const res = await fetchWithAuth('/unix/me');
 
-            if (!res.ok) return;
+            if (!res || !res.ok) return;
 
             const student = await res.json();
             studentNo = student.stdNo;
@@ -135,47 +206,90 @@
 
             try {
                 const res = await fetchWithAuth(`/unix/semesters/${semesterId}/courses`);
-                const courses = await res.json();
 
+                if (!res || !res.ok) {
+                    throw new Error('Failed to load course details');
+                }
+
+                const courses = await res.json();
                 const course = courses.find(c => c.courseId === courseId);
+
+                if (!course) {
+                    throw new Error('Course not found');
+                }
+
+                selectedCourse = course;
 
                 document.getElementById('courseId').textContent = course.courseId;
                 document.getElementById('courseName').textContent = course.courseName;
                 document.getElementById('credits').textContent = course.credits;
-                document.getElementById('capacity').textContent = course.maxCapacity;
+                document.getElementById('seatsAvailable').textContent = course.seatsAvailable;
+                document.getElementById('prerequisites').textContent = formatList(course.prerequisites);
+                document.getElementById('assumedKnowledge').textContent = formatList(course.assumedKnowledge);
 
+                updateEnrolButton(course);
                 document.getElementById('detailsCard').style.display = 'block';
 
             } catch (err) {
                 document.getElementById('guideMessage').style.display = 'none';
-                document.getElementById('errorMessage').style.display = 'block';
+                showMessage('Failed to load course details.', 'error');
             }
         }
 
         async function enrol() {
             const semesterId = localStorage.getItem('selectedSemesterId');
-
             const btn = document.getElementById('enrolBtn');
+
             btn.disabled = true;
             btn.textContent = 'Enrolling...';
 
-            const res = await fetchWithAuth('/unix/enrol', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    stdNo: studentNo,
-                    semesterId: Number(semesterId),
-                    courseId: courseId
-                })
-            });
+            try {
+                const res = await fetchWithAuth('/unix/enrol', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        stdNo: studentNo,
+                        semesterId: Number(semesterId),
+                        courseId: courseId
+                    })
+                });
 
-            if (res.ok) {
-                document.getElementById('successMessage').style.display = 'block';
-                btn.textContent = 'Enrolled';
-            } else {
+                if (!res) {
+                    throw new Error('Request failed');
+                }
+
+                if (res.ok) {
+                    const data = await res.json();
+
+                    let successText = 'Successfully enrolled!';
+
+                    if (data.warningMessage && data.warningMessage.trim() !== '') {
+                        successText += ' Warning: ' + data.warningMessage;
+                    }
+
+                    showMessage(successText, 'success');
+
+                    if (selectedCourse) {
+                        selectedCourse.alreadyEnrolled = true;
+                        if (typeof selectedCourse.seatsAvailable === 'number' && selectedCourse.seatsAvailable > 0) {
+                            selectedCourse.seatsAvailable -= 1;
+                            document.getElementById('seatsAvailable').textContent = selectedCourse.seatsAvailable;
+                        }
+                        updateEnrolButton(selectedCourse);
+                    } else {
+                        btn.textContent = 'Enrolled';
+                    }
+
+                } else {
+                    const errorText = await res.text();
+                    showMessage(errorText || 'Failed to enrol.', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Enrol';
+                }
+            } catch (err) {
+                showMessage('Failed to enrol.', 'error');
                 btn.disabled = false;
                 btn.textContent = 'Enrol';
-                alert('Failed to enrol.');
             }
         }
 
