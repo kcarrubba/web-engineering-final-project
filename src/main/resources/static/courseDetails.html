@@ -31,6 +31,17 @@
             max-width: 260px;
             word-wrap: break-word;
         }
+
+        #warningMessage {
+            background-color: #fff0d1;
+            border-left: 5px solid #b36b00;
+            padding: 10px;
+            margin-top: 10px;
+            margin: 10px auto;
+            display: none;
+            white-space: pre-wrap;
+            max-width: 600px;
+        }
     </style>
 </head>
 
@@ -52,6 +63,7 @@
         <h2>Course Details</h2>
         <p id="guideMessage">Review the course details and enrol below.</p>
         <p id="pageMessage" class="message"></p>
+        <p id="warningMessage"><strong>Warning: </strong><span id="warningText"></span></p>
     </div>
 
     <div style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 100px;">
@@ -227,6 +239,11 @@
                 document.getElementById('prerequisites').textContent = formatList(course.prerequisites);
                 document.getElementById('assumedKnowledge').textContent = formatList(course.assumedKnowledge);
 
+                if (course.assumedKnowledge && course.assumedKnowledge.length > 0) {
+                    document.getElementById('warningText').textContent = 'You haven\'t completed all of the recommended prior courses for this course. We suggest completing them first to help you succeed.';
+                    document.getElementById('warningMessage').style.display = 'block';
+                }
+
                 updateEnrolButton(course);
                 document.getElementById('detailsCard').style.display = 'block';
 
@@ -264,7 +281,8 @@
                     let successText = 'Successfully enrolled!';
 
                     if (data.warningMessage && data.warningMessage.trim() !== '') {
-                        successText += ' Warning: ' + data.warningMessage;
+                        document.getElementById('warningText').textContent = 'You have not completed all recommended prior courses. Completing them may improve your understanding of this course.';
+                        document.getElementById('warningMessage').style.display = 'block';
                     }
 
                     showMessage(successText, 'success');
